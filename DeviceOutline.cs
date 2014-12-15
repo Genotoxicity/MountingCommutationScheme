@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using KSPE3Lib;
 
@@ -27,11 +25,17 @@ namespace MountingCommutationScheme
 
         public bool HasPlacedSymbols { get; private set; }
 
+        public Orientation Orientation
+        {
+            get
+            {
+                return (xMax - xMin) > (yMax - yMin) ? Orientation.Horizontal : Orientation.Vertical;
+            }
+        }
+
         public DeviceOutline(NormalDevice device, Outline outline, int deviceId, Func<List<int>, bool> hasPlacedSymbols)
         {
             this.deviceId = deviceId;
-            if (deviceId == 400082)
-                deviceId.ToString();
             bool hasOutline = false;
             foreach (int outlineId in device.OutlineIds)
             {
@@ -48,7 +52,7 @@ namespace MountingCommutationScheme
             xMax = points.Max(p => p.X);
             yMin = points.Min(p => p.Y);
             yMax = points.Max(p => p.Y);
-            Center = new Point((xMin+xMax) / 2, (yMin + yMax) / 2);
+            Center = new Point(Math.Round((xMin+xMax) / 2, 3), Math.Round((yMin + yMax) / 2,3));
             Area = (xMax - xMin) * (yMax - yMin);
         }
 

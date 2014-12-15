@@ -34,6 +34,7 @@
     <DefineConstants>TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>Sample.ico</ApplicationIcon>
@@ -64,19 +65,31 @@
     </ApplicationDefinition>
     <Compile Include="Cabinet.cs" />
     <Compile Include="CabinetSide.cs" />
-    <Compile Include="ComponentLayout.cs" />
+    <Compile Include="ComponentPin.cs" />
+    <Compile Include="Component\Component.cs" />
+    <Compile Include="Component\ComponentManager.cs" />
+    <Compile Include="Component\DeviceHorizontalComponent.cs" />
+    <Compile Include="ElementPin.cs" />
+    <Compile Include="Element\DeviceElement.cs" />
     <Compile Include="DeviceOutline.cs" />
     <Compile Include="DeviceOutlineOnSheetHorizontalComparer.cs" />
-    <Compile Include="DeviceRow.cs" />
-    <Compile Include="Level.cs" />
+    <Compile Include="Component\DeviceVerticalComponent.cs" />
+    <Compile Include="Element\Element.cs" />
+    <Compile Include="Component\HorizontalComponent.cs" />
+    <Compile Include="Enums\Level.cs" />
+    <Compile Include="ElementSizes.cs" />
+    <Compile Include="Margins.cs" />
     <Compile Include="MateAddresses.cs" />
-    <Compile Include="DeviceSymbol.cs" />
-    <Compile Include="PinSymbol.cs" />
+    <Compile Include="Enums\Orientation.cs" />
+    <Compile Include="Enums\Position.cs" />
     <Compile Include="PreviewAllocator.cs" />
     <Compile Include="ProjectObjects.cs" />
-    <Compile Include="RowSymbol.cs" />
+    <Compile Include="Row.cs" />
+    <Compile Include="RowSymbol\RowSymbol.cs" />
     <Compile Include="SchemeSheet.cs" />
     <Compile Include="Script.cs" />
+    <Compile Include="Component\TerminalHorizontalComponent.cs" />
+    <Compile Include="Component\VerticalComponent.cs" />
     <Page Include="UI.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -86,11 +99,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Settings.cs" />
+    <Compile Include="RowSymbol\SingleRowSymbol.cs" />
     <Compile Include="StampAttributes.cs" />
     <Compile Include="SheetFormat.cs" />
     <Compile Include="SidePreview.cs" />
-    <Compile Include="SideType.cs" />
+    <Compile Include="Enums\SideType.cs" />
     <Compile Include="StampTextInfo.cs" />
+    <Compile Include="Component\TerminalVerticalComponent.cs" />
+    <Compile Include="Element\TerminalElement.cs" />
+    <Compile Include="RowSymbol\StripRowSymbol.cs" />
     <Compile Include="UI.xaml.cs">
       <DependentUpon>UI.xaml</DependentUpon>
       <SubType>Code</SubType>
@@ -126,6 +143,7 @@
   <ItemGroup>
     <Resource Include="Sample.ico" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

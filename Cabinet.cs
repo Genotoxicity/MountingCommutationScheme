@@ -1,10 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Text.RegularExpressions;
 using KSPE3Lib;
 
 namespace MountingCommutationScheme
@@ -12,8 +8,15 @@ namespace MountingCommutationScheme
     public class Cabinet
     {
         private List<CabinetSide> sides;
-        private string name;
         private StampAttributes stampAttributes;
+
+        public IEnumerable<Element> Elements
+        {
+            get
+            {
+                return sides.SelectMany(s => s.Elements);
+            }
+        }
 
         public List<CabinetSide> Sides
         {
@@ -31,6 +34,7 @@ namespace MountingCommutationScheme
             Outline outline = projectObjects.Outline;
             Symbol symbol = projectObjects.Symbol;
             Dictionary<int, DeviceOutline> deviceOutlineById = new Dictionary<int, DeviceOutline>();
+            List<int> verticalMountIds = new List<int>();
             Dictionary<string, int> assignmentCountByAssignment = new Dictionary<string, int>();
             foreach (int symbolId in sheet.SymbolIds)
             {
@@ -43,28 +47,16 @@ namespace MountingCommutationScheme
                 DeviceOutline deviceOutline = new DeviceOutline(device, outline, deviceId, (symbolIds) => { if (symbolIds.Count == 0) return false; return symbolIds.Any(sId => { symbol.Id = sId; return electricSchemeSheetIds.Contains(symbol.SheetId); }); });
                 if (!deviceOutlineById.ContainsKey(deviceId))
                     deviceOutlineById.Add(deviceId, deviceOutline);
+                if (device.IsMount() && deviceOutline.Orientation == Orientation.Vertical)
+                    verticalMountIds.Add(deviceId);
             }
-            name = GetName(assignmentCountByAssignment);
-            sides = GetSides(projectObjects, sheet, settings, deviceOutlineById.Values.ToList(), electricSchemeSheetIds);
+            ComponentManager componentManager = new ComponentManager(projectObjects, settings);
+            sides = GetSides(projectObjects, sheet, settings, deviceOutlineById.Values.ToList(), electricSchemeSheetIds, componentManager, verticalMountIds);
+            componentManager.CalculateComponents();
             stampAttributes = new StampAttributes(projectObjects, settings);
         }
 
-        private static string GetName(Dictionary<string, int> assignmentCountByAssignment)
-        {
-            string cabinetName = String.Empty;
-            int max = int.MinValue;
-            foreach (string assignment in assignmentCountByAssignment.Keys)
-            {
-                if (max <= assignmentCountByAssignment[assignment])
-                {
-                    max = assignmentCountByAssignment[assignment];
-                    cabinetName = assignment;
-                }
-            }
-            return cabinetName;
-        }
-
-        private List<CabinetSide> GetSides(ProjectObjects projectObjects, Sheet sheet, Settings settings, List<DeviceOutline> deviceOutlines, HashSet<int> electricSchemeSheetIds)
+        private static List<CabinetSide> GetSides(ProjectObjects projectObjects, Sheet sheet, Settings settings, List<DeviceOutline> deviceOutlines, HashSet<int> electricSchemeSheetIds, ComponentManager componentManager, List<int> verticalMountIds)
         {
             Dictionary<DeviceOutline, List<DeviceOutline>> includedOutlinesByIncluding = GetIncludedOutlinesByIncluding(deviceOutlines);
             List<CabinetSide> localSides = new List<CabinetSide>();
@@ -72,36 +64,32 @@ namespace MountingCommutationScheme
             NormalDevice device = projectObjects.Device;
             foreach (DeviceOutline outline in includedOutlinesByIncluding.Keys)
             {
+                device.Id = outline.DeviceId;
                 List<DeviceOutline> includedOutlines = includedOutlinesByIncluding[outline];
-                if (includedOutlines.Select(i => i.DeviceId == 400082).Count() > 0)
-                    includedOutlines.ToString();
-                includedOutlines.RemoveAll(devOut => !devOut.HasPlacedSymbols);    // удаляем устройства, не имеющие размещенных символов - монтажные рейки, соединители, батареи
-                if (includedOutlines.Select(i => i.DeviceId == 400082).Count() > 0)
-                    includedOutlines.ToString();
+                includedOutlines.RemoveAll(devOut => !devOut.HasPlacedSymbols); // удаляем устройства, не имеющие размещенных символов - монтажные рейки, соединители, батареи
                 includedOutlines.ForEach(devOut => deviceOutlines.Remove(devOut));  // удаляем устройства, уже попавшие в какую - либо часть шкафа
                 deviceOutlines.Remove(outline); // удаляем включающее устройство - это какой - либо шкаф, стенка и т.п. не отображающиеся на схеме
-                device.Id = outline.DeviceId;
                 SideType sideType = SideType.Panel;
                 string function = device.GetAttributeValue(settings.FunctionAttribute);
                 if (settings.SideTypeByFunction.ContainsKey(function))
                     sideType = settings.SideTypeByFunction[function];
                 if (sideType == SideType.Panel)
-                    localSides.Add(new CabinetSide(projectObjects, settings, name, "Монтажная панель", outline.DeviceId, includedOutlines, sheet, electricSchemeSheetIds));
+                    localSides.Add(new CabinetSide(projectObjects, "Монтажная панель", outline.DeviceId, includedOutlines, sheet, electricSchemeSheetIds, componentManager,verticalMountIds));
                 if (sideType == SideType.Sidewall)
                     sidewallOutlines.Add(outline);
             }
             deviceOutlines.RemoveAll(devOut => !devOut.HasPlacedSymbols); // оставшиеся устройства относятся к "двери"
             if( deviceOutlines.Count>0)
-                localSides.Add(new CabinetSide(projectObjects, settings, name, "Дверь", 0, deviceOutlines, sheet, electricSchemeSheetIds));
+                localSides.Add(new CabinetSide(projectObjects, "Дверь", 0, deviceOutlines, sheet, electricSchemeSheetIds, componentManager, verticalMountIds));
             int sidewallCount = sidewallOutlines.Count;
             if (sidewallCount == 1)
-                localSides.Add(new CabinetSide(projectObjects, settings, name, "Боковая стенка", sidewallOutlines.First().DeviceId, includedOutlinesByIncluding[sidewallOutlines.First()], sheet, electricSchemeSheetIds));
+                localSides.Add(new CabinetSide(projectObjects, "Боковая стенка", sidewallOutlines.First().DeviceId, includedOutlinesByIncluding[sidewallOutlines.First()], sheet, electricSchemeSheetIds, componentManager, verticalMountIds));
             if (sidewallCount > 1)
             {
                 sidewallOutlines.Sort(new DeviceOutlineOnSheetHorizontalComparer(sheet));
-                localSides.Add(new CabinetSide(projectObjects, settings, name, "Левая боковая стенка", sidewallOutlines.First().DeviceId, includedOutlinesByIncluding[sidewallOutlines.First()], sheet, electricSchemeSheetIds));
+                localSides.Add(new CabinetSide(projectObjects, "Левая боковая стенка", sidewallOutlines.First().DeviceId, includedOutlinesByIncluding[sidewallOutlines.First()], sheet, electricSchemeSheetIds, componentManager, verticalMountIds));
                 for (int i = 1; i < sidewallCount; i++)
-                    localSides.Add(new CabinetSide(projectObjects, settings, name, "Правая боковая стенка", sidewallOutlines[i].DeviceId, includedOutlinesByIncluding[sidewallOutlines[i]], sheet, electricSchemeSheetIds));
+                    localSides.Add(new CabinetSide(projectObjects, "Правая боковая стенка", sidewallOutlines[i].DeviceId, includedOutlinesByIncluding[sidewallOutlines[i]], sheet, electricSchemeSheetIds, componentManager, verticalMountIds));
             }
             return localSides;
         }
@@ -134,9 +122,9 @@ namespace MountingCommutationScheme
             return includedOutlinesByIncluding;
         }
 
-        public void Place(ProjectObjects projectObjects, Settings settings, Dictionary<string, ComponentLayout> componentLayoutByName)
+        public void Place(ProjectObjects projectObjects, Settings settings)
         {
-            sides.ForEach(s=>s.CalculateRows(settings, componentLayoutByName));
+            sides.ForEach(s=>s.CalculateRows());
             int sideCount = sides.Count;
             bool isNeedPreview = false;
             isNeedPreview |= !sides[0].IsFitIntoOneSheet(settings, true);
@@ -155,13 +143,13 @@ namespace MountingCommutationScheme
                 stampAttributes.SetSheetCount(totalSheetCount);
                 previewAllocator.Place(projectObjects, settings, stampAttributes);
                 int sheetNumber = previewSheetCount + 1;
-                sides.ForEach(side => side.Place(projectObjects, settings, componentLayoutByName, ref sheetNumber, stampAttributes));
+                sides.ForEach(side => side.Place(projectObjects, settings, ref sheetNumber, stampAttributes));
             }
             else
             {
                 int sheetNumber = 1;
                 stampAttributes.SetSheetCount(sides.Sum(s => s.SheetCount));
-                sides.ForEach(side => side.Place(projectObjects, settings, componentLayoutByName, ref sheetNumber, stampAttributes));
+                sides.ForEach(side => side.Place(projectObjects, settings, ref sheetNumber, stampAttributes));
             }
         }
     }

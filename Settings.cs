@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using KSPE3Lib;
 
 namespace MountingCommutationScheme
@@ -16,23 +12,23 @@ namespace MountingCommutationScheme
         public double HalfGridStep { get; private set; }
         public double MinSignalLineLength { get; private set; }
         public double MinPinHeight { get; private set; }
-        public double SignalHorizontalOffset { get; private set; }
-        public double SignalVerticalOffset { get; private set; }
-        public double AdressesVerticalOffset { get; private set; }
-        public double PinWidth { get; private set; }
+        public double SignalOffsetFromLine { get; private set; }
+        public double SignalOffsetFromOutline { get; private set; }
+        public double AdressOffset { get; private set; }
+        public double PinMinSize { get; private set; }
         public SheetFormat A4First { get; private set; }
         public SheetFormat A4Subsequent { get; private set; }
         public SheetFormat A3First { get; private set; }
         public SheetFormat A3Subsequent { get; private set; }
         public double SheetTitleUnderlineOffset { get; private set; }
-        public double TerminalWidth { get; private set; }
-        public double TerminalHeight { get; private set; }
+        public double TerminalMinSize { get; private set; }
+        public double TerminalMaxSize { get; private set; }
         public string FunctionAttribute { get; private set; }
         public string SheetMarkAttribute { get; private set; }
         public string SubProjectAttribute { get; private set; }
-        public string TerminalComponent { get; private set; }
         public string SheetCountAttribute { get; private set; }
         public string DrawingNameAttribute { get; private set; }
+        public string TerminalComponent { get; private set; }
         public int ObjectNameTextType { get; private set; }
         public int ProjectTextType { get; private set; }
         public Dictionary<string, SideType> SideTypeByFunction { get; private set; }
@@ -46,13 +42,13 @@ namespace MountingCommutationScheme
             GridStep = 4;
             HalfGridStep = GridStep / 2;
             MinSignalLineLength = 8;
-            SignalHorizontalOffset = 1;
-            SignalVerticalOffset = 2;
+            SignalOffsetFromLine = 1;
+            SignalOffsetFromOutline = 2;
             MinPinHeight = 4;
-            AdressesVerticalOffset = 1;
-            PinWidth = GridStep;
-            TerminalWidth = 8;
-            TerminalHeight = 25;
+            AdressOffset = 1;
+            PinMinSize = GridStep;
+            TerminalMinSize = 8;
+            TerminalMaxSize = 25;
             A4First = new SheetFormat("Формат А4 лист 1", 185, 232, 20, 5, 8, 12);
             A4Subsequent = new SheetFormat("Формат А4 послед. листы", 185, 272, 20, 5, 8, 12);
             A3First = new SheetFormat("Формат А3 лист 1", 395, 232, 20, 5, 16, 12);
@@ -62,7 +58,7 @@ namespace MountingCommutationScheme
             SheetMarkAttribute = "marka2";
             SubProjectAttribute = "SubProj";
             SheetCountAttribute = "Всего листов";
-            DrawingNameAttribute = "Название четрежа"; 
+            DrawingNameAttribute = "Название четрежа";
             TerminalComponent = "TerminalComponent";
             ObjectNameTextType = 505;
             ProjectTextType = 108;

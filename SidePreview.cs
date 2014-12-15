@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using KSPE3Lib;
 
@@ -29,14 +28,6 @@ namespace MountingCommutationScheme
                 return height;
             }
         }
-
-        /*public int SheetCount
-        {
-            get
-            {
-                return formatLayout.Sum(r => r.Count());
-            }
-        }*/
 
         public SidePreview(Settings settings, CabinetSide side)
         {
@@ -67,7 +58,6 @@ namespace MountingCommutationScheme
             E3Font headerFont = settings.SheetTitleFont;
             E3Font numberFont = new E3Font(height: 5, alignment: Alignment.Centered, style: Styles.Italic);
             double textOrdinate = sheet.MoveDown(top, headerFont.height / 2);
-            double textWidth = text.GetTextLength(header, headerFont);
             double textAbsciss = position.X;
             int sheetCount = formatLayout.Sum(r => r.Count());
             List<int> ids = new List<int>(sheetCount * 2 + 1);

@@ -42,7 +42,7 @@ namespace MountingCommutationScheme
         private void DoButton_Click(object sender, RoutedEventArgs e)
         {
             Cursor = Cursors.Wait;
-            new Script().Main(applicationInfo.ProcessId);
+            Script.Main(applicationInfo.ProcessId);
             Cursor = Cursors.Arrow;
         }
 

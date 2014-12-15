@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Windows;
 using KSPE3Lib;
 
@@ -60,13 +59,13 @@ namespace MountingCommutationScheme
                 format = maxMinWidth <= settings.A4Subsequent.AvailableWidth ? settings.A4Subsequent : settings.A3Subsequent;
         }
 
-        public static SchemeSheet[][] GetSheetsLayout(List<DeviceRow> deviceRows, Settings settings, bool isFirst)
+        public static SchemeSheet[][] GetSheetsLayout(List<Row> rows, Settings settings, bool isFirst)
         {
             double titleGap = settings.SheetTitleFont.height + settings.SheetTitleUnderlineOffset + settings.HalfGridStep;
             double firstVerticalFreeSpace = isFirst ? settings.A3First.AvailableHeight : settings.A3Subsequent.AvailableHeight;
             firstVerticalFreeSpace -= titleGap;
-            List<RowSymbolInSheet> symbolsInSheet = GetRowSymbolsInSheet(deviceRows, settings, titleGap, firstVerticalFreeSpace);
-            Dictionary<int, double> offsetFromTopByRowNumber = GetOffsetFromTopByRowNumber(symbolsInSheet, deviceRows, settings, titleGap, firstVerticalFreeSpace);
+            List<RowSymbolInSheet> symbolsInSheet = GetRowSymbolsInSheet(rows, settings, titleGap, firstVerticalFreeSpace);
+            Dictionary<int, double> offsetFromTopByRowNumber = GetOffsetFromTopByRowNumber(symbolsInSheet, rows, settings, titleGap, firstVerticalFreeSpace);
             Dictionary<Tuple<int, int>, SchemeSheet> schemeSheetByPosition = new Dictionary<Tuple<int, int>, SchemeSheet>();
             Dictionary<int, int> maxHorizontalSheetNumberByVerticalNumber = new Dictionary<int, int>();
             foreach (RowSymbolInSheet symbolInSheet in symbolsInSheet)
@@ -85,9 +84,9 @@ namespace MountingCommutationScheme
                 schemeSheet.CalculateRowsMinimalWidth(settings.GridStep);
                 schemeSheet.SelectFormat(settings, false);
             }
-            Tuple<int, int> firstPosition = new Tuple<int,int>(0,0);
+            Tuple<int, int> firstPosition = new Tuple<int, int>(0, 0);
             schemeSheetByPosition[firstPosition].SelectFormat(settings, isFirst);
-            SchemeSheet[][] sheetsLayout = Array.CreateInstance(typeof (SchemeSheet[]), maxHorizontalSheetNumberByVerticalNumber.Keys.Count) as SchemeSheet[][];
+            SchemeSheet[][] sheetsLayout = Array.CreateInstance(typeof(SchemeSheet[]), maxHorizontalSheetNumberByVerticalNumber.Keys.Count) as SchemeSheet[][];
             foreach (int verticalNumber in maxHorizontalSheetNumberByVerticalNumber.Keys)
                 sheetsLayout[verticalNumber] = Array.CreateInstance(typeof(SchemeSheet), maxHorizontalSheetNumberByVerticalNumber[verticalNumber] + 1) as SchemeSheet[];
             foreach (Tuple<int, int> position in schemeSheetByPosition.Keys)
@@ -95,23 +94,23 @@ namespace MountingCommutationScheme
             return sheetsLayout;
         }
 
-        private static Dictionary<int, double> GetOffsetFromTopByRowNumber(List<RowSymbolInSheet> symbolsInSheet, List<DeviceRow> deviceRows, Settings settings, double titleGap, double firstVerticalFreeSpace)
+        private static Dictionary<int, double> GetOffsetFromTopByRowNumber(List<RowSymbolInSheet> symbolsInSheet, List<Row> rows, Settings settings, double titleGap, double firstVerticalFreeSpace)
         {
-            Dictionary<int, double> offsetFromTopByRowNumber = new Dictionary<int, double>(deviceRows.Count);
+            Dictionary<int, double> offsetFromTopByRowNumber = new Dictionary<int, double>(rows.Count);
             Dictionary<int, List<int>> rowNumbersByVerticalSheetNumber = GetRowNumbersByVerticalSheetNumber(symbolsInSheet);
             double verticalFreeSpace = firstVerticalFreeSpace;
             foreach (List<int> rowNumbers in rowNumbersByVerticalSheetNumber.Values)
             {
-                double rowsHeight = rowNumbers.Sum(rn => deviceRows[rn].Height);
+                double rowsHeight = rowNumbers.Sum(rn => rows[rn].Height);
                 double totalVerticalGap = verticalFreeSpace - rowsHeight;
                 double verticalGap = totalVerticalGap / rowNumbers.Count;
                 double offset = settings.A3Subsequent.TopBorder + verticalGap / 2 + titleGap;
                 foreach (int rowNumber in rowNumbers)
                 {
-                    DeviceRow row = deviceRows[rowNumber];
+                    Row row = rows[rowNumber];
                     offset += row.TopMargin;
                     offsetFromTopByRowNumber.Add(rowNumber, offset);
-                    offset += (row.BottomMargin+verticalGap);
+                    offset += (row.BottomMargin + verticalGap);
                 }
             }
             return offsetFromTopByRowNumber;
@@ -131,22 +130,22 @@ namespace MountingCommutationScheme
             return rowNumbersByVerticalSheetNumber;
         }
 
-        private static List<RowSymbolInSheet> GetRowSymbolsInSheet(List<DeviceRow> deviceRows, Settings settings, double titleGap, double firstVerticalFreeSpace)
+        private static List<RowSymbolInSheet> GetRowSymbolsInSheet(List<Row> rows, Settings settings, double titleGap, double firstVerticalFreeSpace)
         {
-            List<RowSymbolInSheet> rowSymbolsInSheet = new List<RowSymbolInSheet>(deviceRows.Sum(dr => dr.RowSymbols.Count));
+            List<RowSymbolInSheet> rowSymbolsInSheet = new List<RowSymbolInSheet>(rows.Sum(r => r.Symbols.Count));
             double verticalFreeSpace = firstVerticalFreeSpace;
             int verticalSheetNumber = 0;
-            foreach (DeviceRow deviceRow in deviceRows)
+            foreach (Row row in rows)
             {
-                verticalFreeSpace -= (deviceRow.Height + settings.GridStep);
+                verticalFreeSpace -= (row.Height + settings.GridStep);
                 if (verticalFreeSpace < 0)
                 {
                     verticalSheetNumber++;
-                    verticalFreeSpace = settings.A3Subsequent.AvailableHeight - (deviceRow.Height + titleGap + settings.GridStep);
+                    verticalFreeSpace = settings.A3Subsequent.AvailableHeight - (row.Height + titleGap + settings.GridStep);
                 }
                 int horizontalSheetNumber = 0;
                 double horizontalFreeSpace = settings.A3Subsequent.AvailableWidth;
-                foreach (RowSymbol symbol in deviceRow.RowSymbols)
+                foreach (RowSymbol symbol in row.Symbols)
                 {
                     horizontalFreeSpace -= symbol.Width + settings.GridStep;
                     if (horizontalFreeSpace < 0)
@@ -154,13 +153,13 @@ namespace MountingCommutationScheme
                         horizontalSheetNumber++;
                         horizontalFreeSpace = settings.A3Subsequent.AvailableWidth - (symbol.Width + settings.GridStep);
                     }
-                    rowSymbolsInSheet.Add(new RowSymbolInSheet(deviceRow.Number, symbol, verticalSheetNumber, horizontalSheetNumber));
+                    rowSymbolsInSheet.Add(new RowSymbolInSheet(row.Number, symbol, verticalSheetNumber, horizontalSheetNumber));
                 }
             }
             return rowSymbolsInSheet;
         }
 
-        public void Place(ProjectObjects projectObjects, Settings settings, Dictionary<string, ComponentLayout> componentLayoutByName, string cabinetSideName, int sheetNumber, StampAttributes sheetAttributes)
+        public void Place(ProjectObjects projectObjects, Settings settings, string cabinetSideName, int sheetNumber, StampAttributes sheetAttributes)
         {
             E3Text text = projectObjects.Text;
             Sheet sheet = projectObjects.Sheet;
@@ -180,7 +179,7 @@ namespace MountingCommutationScheme
                     double halfWidth = symbol.Width / 2;
                     offset += halfWidth;
                     double absciss = sheet.MoveRight(sheet.DrawingArea.Left, offset);
-                    symbol.Place(projectObjects, settings, sheet, new Point(absciss, ordinate), componentLayoutByName);
+                    symbol.Place(projectObjects, sheet, sheetId, new Point(absciss, ordinate));
                     offset += (halfWidth + horizontalGap);
                 }
             }
