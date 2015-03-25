@@ -3,39 +3,43 @@ using KSPE3Lib;
 
 namespace MountingCommutationScheme
 {
-    public class Settings
+    public static class Settings
     {
-        public E3Font SmallFont { get; private set; }
-        public E3Font Font { get; private set; }
-        public E3Font SheetTitleFont { get; private set; }
-        public double GridStep { get; private set; }
-        public double HalfGridStep { get; private set; }
-        public double MinSignalLineLength { get; private set; }
-        public double MinPinHeight { get; private set; }
-        public double SignalOffsetFromLine { get; private set; }
-        public double SignalOffsetFromOutline { get; private set; }
-        public double AdressOffset { get; private set; }
-        public double PinMinSize { get; private set; }
-        public SheetFormat A4First { get; private set; }
-        public SheetFormat A4Subsequent { get; private set; }
-        public SheetFormat A3First { get; private set; }
-        public SheetFormat A3Subsequent { get; private set; }
-        public double SheetTitleUnderlineOffset { get; private set; }
-        public double TerminalMinSize { get; private set; }
-        public double TerminalMaxSize { get; private set; }
-        public string FunctionAttribute { get; private set; }
-        public string SheetMarkAttribute { get; private set; }
-        public string SubProjectAttribute { get; private set; }
-        public string SheetCountAttribute { get; private set; }
-        public string DrawingNameAttribute { get; private set; }
-        public string TerminalComponent { get; private set; }
-        public int ObjectNameTextType { get; private set; }
-        public int ProjectTextType { get; private set; }
-        public Dictionary<string, SideType> SideTypeByFunction { get; private set; }
-        public int ElectricSchemeTypeCode { get; private set; }
+        public static double JumperHeight { get; private set; }
+        public static E3Font SmallFont { get; private set; }
+        public static E3Font Font { get; private set; }
+        public static E3Font SheetTitleFont { get; private set; }
+        public static double GridStep { get; private set; }
+        public static double HalfGridStep { get; private set; }
+        public static double MinSignalLineLength { get; private set; }
+        public static double MinPinHeight { get; private set; }
+        public static double SignalOffsetFromLine { get; private set; }
+        public static double SignalOffsetFromOutline { get; private set; }
+        public static double SignalOffsetAfterText { get; private set; }
+        public static double AdressOffset { get; private set; }
+        public static double PinMinSize { get; private set; }
+        public static SheetFormat A4First { get; private set; }
+        public static SheetFormat A4Subsequent { get; private set; }
+        public static SheetFormat A3First { get; private set; }
+        public static SheetFormat A3Subsequent { get; private set; }
+        public static double SheetTitleUnderlineOffset { get; private set; }
+        public static double TerminalMinSize { get; private set; }
+        public static double TerminalMaxSize { get; private set; }
+        public static string FunctionAttribute { get; private set; }
+        public static string SheetMarkAttribute { get; private set; }
+        public static string SubProjectAttribute { get; private set; }
+        public static string SheetCountAttribute { get; private set; }
+        public static string TerminalComponent { get; private set; }
+        public static string DrawingName { get; private set; }
+        public static int ObjectNameTextType { get; private set; }
+        public static int ProjectTextType { get; private set; }
+        public static int DrawingNameTextType { get; private set; }
+        public static Dictionary<string, SideType> SideTypeByFunction { get; private set; }
+        public static int ElectricSchemeTypeCode { get; private set; }
 
-        public Settings()
+        static Settings()
         {
+            JumperHeight = 2.2;
             SmallFont = new E3Font(height: 2.5);
             Font = new E3Font(height: 3.5);
             SheetTitleFont = new E3Font(height: 5, style: Styles.Italic | Styles.Underline);
@@ -43,7 +47,8 @@ namespace MountingCommutationScheme
             HalfGridStep = GridStep / 2;
             MinSignalLineLength = 8;
             SignalOffsetFromLine = 1;
-            SignalOffsetFromOutline = 2;
+            SignalOffsetFromOutline = 3;
+            SignalOffsetAfterText = 1;
             MinPinHeight = 4;
             AdressOffset = 1;
             PinMinSize = GridStep;
@@ -58,12 +63,20 @@ namespace MountingCommutationScheme
             SheetMarkAttribute = "marka2";
             SubProjectAttribute = "SubProj";
             SheetCountAttribute = "Всего листов";
-            DrawingNameAttribute = "Название четрежа";
             TerminalComponent = "TerminalComponent";
+            DrawingName = "Монтажно - коммутационная схема";
             ObjectNameTextType = 505;
             ProjectTextType = 108;
-            SideTypeByFunction = new Dictionary<string, SideType>() { { "Корпуса", SideType.Panel }, { "Боковые стенки", SideType.Sidewall }};
+            DrawingNameTextType = 497;
+            SideTypeByFunction = new Dictionary<string, SideType>() { { "Корпуса", SideType.Panel }, { "Боковые стенки", SideType.Sidewall }, {"Двери", SideType.Door}};
             ElectricSchemeTypeCode = 0;
+        }
+
+        public static SideType GetSideTypeByFunction(string function)
+        {
+            if (SideTypeByFunction.ContainsKey(function))
+                return SideTypeByFunction[function];
+            return SideType.None;
         }
     }
 }

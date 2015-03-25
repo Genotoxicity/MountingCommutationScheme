@@ -1,4 +1,5 @@
-﻿using KSPE3Lib;
+﻿using System.Collections.Generic;
+using KSPE3Lib;
 
 namespace MountingCommutationScheme
 {
@@ -14,6 +15,7 @@ namespace MountingCommutationScheme
         public Graphic Graphic { get; private set; }
         public Group Group { get; private set; }
         public Symbol Symbol { get; private set; }
+        public HashSet<int> ElectricSheetIds { get; private set; }
 
         public ProjectObjects(E3Project project)
         {
@@ -27,6 +29,20 @@ namespace MountingCommutationScheme
             Graphic = project.GetGraphicById(0);
             Group = project.GetGroupById(0);
             Symbol = project.GetSymbolById(0);
+            ElectricSheetIds = GetElectricSheetIds(project.SheetIds);
+        }
+
+        private HashSet<int> GetElectricSheetIds(List<int> sheetIds)
+        {
+            int electricSchemeTypeCode = Settings.ElectricSchemeTypeCode;
+            HashSet<int> electricSchemeSheetIds = new HashSet<int>();
+            foreach (int sheetId in sheetIds)
+            {
+                Sheet.Id = sheetId;
+                if (Sheet.IsSchematicTypeOf(electricSchemeTypeCode))
+                    electricSchemeSheetIds.Add(sheetId);
+            }
+            return electricSchemeSheetIds;
         }
     }
 }

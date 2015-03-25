@@ -5,7 +5,7 @@ namespace MountingCommutationScheme
 {
     public class DeviceElement : Element
     {
-        public DeviceElement(ProjectObjects projectObjects, DeviceOutline outline, Orientation orientation, ComponentManager componentManager, HashSet<int> electricSchemeSheetIds) : base(projectObjects, outline, orientation, electricSchemeSheetIds)
+        public DeviceElement(ProjectObjects projectObjects, DeviceOutline outline, ComponentManager componentManager, Orientation orientation) : base(projectObjects, outline, orientation)
         {
             Device device = projectObjects.Device;
             device.Id = outline.DeviceId;

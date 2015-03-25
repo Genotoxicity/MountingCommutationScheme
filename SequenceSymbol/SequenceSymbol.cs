@@ -4,13 +4,15 @@ using KSPE3Lib;
 
 namespace MountingCommutationScheme
 {
-    public abstract class RowSymbol
+    public abstract class SequenceSymbol
     {
         public double Width { get; protected set; }
 
-        public abstract IEnumerable<Element> Elements{ get; }
+        public double Height { get; protected set; }
 
-        public abstract Margins CalculateAndGetMargins();
+        public Margins Margins { get; protected set; }
+
+        public abstract IEnumerable<Element> Elements{ get; }
 
         public abstract void Place(ProjectObjects projectObjects, Sheet sheet, int sheetId, Point position);
     }

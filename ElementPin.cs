@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System;
 
 namespace MountingCommutationScheme
 {
@@ -7,6 +8,8 @@ namespace MountingCommutationScheme
     {
         private int equivalentElectricSchemePinId;
         private int panelPinId;
+
+        public bool IsJumpered { get; private set; }
 
         public string Signal { get; private set; }
 
@@ -51,6 +54,17 @@ namespace MountingCommutationScheme
                 addresses = addresses.Distinct().ToList();
             }
             Addresses = addresses;
+        }
+
+        public void SetJumpered(string adressToRemove)
+        {
+            if (Addresses.Contains(adressToRemove))
+            {
+                IsJumpered = true;
+                Addresses.Remove(adressToRemove);
+                if (Addresses.Count == 0)
+                    Signal = String.Empty;
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Windows;
 using KSPE3Lib;
 
@@ -8,10 +9,9 @@ namespace MountingCommutationScheme
 {
     public class SidePreview
     {
-        private string header;
         private double width;
         private double height;
-        private SheetFormat[][] formatLayout;
+        private SideOutlineLayout sideLayout;
 
         public double Width
         {
@@ -20,65 +20,89 @@ namespace MountingCommutationScheme
                 return width;
             }
         }
-
-        public double Height
+        
+        public SidePreview(SideOutlineLayout sideLayout, double scaleFactor, double margin)
         {
-            get
-            {
-                return height;
-            }
+            width = sideLayout.Width * scaleFactor;
+            height = sideLayout.Height * scaleFactor;
+            this.sideLayout = sideLayout;
         }
 
-        public SidePreview(Settings settings, CabinetSide side)
+        public void Place(ProjectObjects projectObjects, Sheet sheet, int sheetId, double startX, double startY, double scaleFactor)
         {
-            header = side.Name;
-            formatLayout = side.GetFormatLayout();
-            width = 0;
-            height = 0;
-            foreach (SheetFormat[] row in formatLayout)
-            {
-                double rowWidth = row.Sum(r => r.PreviewWidth);
-                width = Math.Max(width, rowWidth);
-                height += row.First().PreviewHeight;
-            }
-            double titleGap = settings.SheetTitleFont.height + settings.SheetTitleUnderlineOffset + settings.GridStep;
-            height += titleGap;
-        }
-
-        public void Place(ProjectObjects projectObjects, Settings settings, int sheetId, Point position, ref int sheetNumber)
-        {
-            Sheet sheet = projectObjects.Sheet;
+            Graphic graph = projectObjects.Graphic;
             E3Text text = projectObjects.Text;
-            Graphic graphic = projectObjects.Graphic;
-            Group group = projectObjects.Group;
-            sheet.Id = sheetId;
-            double top = sheet.MoveUp(position.Y, height / 2);
-            double left = sheet.MoveLeft(position.X, width / 2);
-            double titleGap = settings.SheetTitleFont.height + settings.SheetTitleUnderlineOffset + settings.GridStep;
-            E3Font headerFont = settings.SheetTitleFont;
-            E3Font numberFont = new E3Font(height: 5, alignment: Alignment.Centered, style: Styles.Italic);
-            double textOrdinate = sheet.MoveDown(top, headerFont.height / 2);
-            double textAbsciss = position.X;
-            int sheetCount = formatLayout.Sum(r => r.Count());
-            List<int> ids = new List<int>(sheetCount * 2 + 1);
-            ids.Add(text.CreateText(sheetId, header, textAbsciss, textOrdinate, headerFont));
-            double y1 = sheet.MoveDown(top, titleGap);
-            foreach (SheetFormat[] row in formatLayout)
+            PreviewPointConverter converter = new PreviewPointConverter(sideLayout.Left, sideLayout.Bottom, startX, startY, scaleFactor);
+            double outlineLeft = converter.GetX(sideLayout.Left);
+            double outlineRight = converter.GetX(sideLayout.Right);
+            double outlineTop = converter.GetY(sideLayout.Top);
+            double outlineBottom = converter.GetY(sideLayout.Bottom);
+            graph.CreateRectangle(sheetId, outlineLeft, outlineBottom, outlineRight, outlineTop);
+            double textY = sheet.MoveUp(outlineTop, Settings.GridStep);
+            E3Font font = new E3Font(Settings.Font);
+            font.alignment = Alignment.Centered;
+            text.CreateText(sheetId, sideLayout.Name, (outlineLeft + outlineRight) / 2, textY, Settings.Font);
+            foreach (OutlineSequence row in sideLayout.Rows)
             {
-                double x1 = left;
-                double y2 = sheet.MoveDown(y1, row.First().PreviewHeight);
-                foreach (SheetFormat sheetFormat in row)
-                {
-                    double x2 = sheet.MoveRight(x1, sheetFormat.PreviewWidth);
-                    ids.Add(graphic.CreateRectangle(sheetId, x1, y1, x2, y2));
-                    double ordinate = sheet.MoveDown((y1 + y2) / 2, numberFont.height / 2);
-                    ids.Add(text.CreateText(sheetId, (sheetNumber++).ToString(), (x1 + x2) / 2, ordinate, numberFont));
-                    x1 = x2;
-                }
-                y1 = y2;
+                double left = converter.GetX(row.Left);
+                double right = converter.GetX(row.Right);
+                double top = converter.GetY(row.Top);
+                double bottom = converter.GetY(row.Bottom);
+                graph.CreateRectangle(sheetId, left, bottom, right, top);
             }
-            group.CreateGroup(ids);
+            foreach (OutlineSequence column in sideLayout.Columns)
+            {
+                double left = converter.GetX(column.Left);
+                double right = converter.GetX(column.Right);
+                double top = converter.GetY(column.Top);
+                double bottom = converter.GetY(column.Bottom);
+                graph.CreateRectangle(sheetId, left, bottom, right, top);
+            }
         }
 
+        private class PreviewPointConverter
+        {
+            private double scaleFactor;
+            private double outlineLeft;
+            private double outlineBottom;
+            private double startLeft;
+            private double startBottom;
+
+            public PreviewPointConverter(double sideLayoutLeft, double sideLayoutBottom, double startX, double startY, double scaleFactor)
+            {
+                this.scaleFactor = scaleFactor;
+                outlineLeft = sideLayoutLeft;
+                outlineBottom = sideLayoutBottom;
+                startLeft = startX;
+                startBottom = startY;
+            }
+
+            public Point GetSheetPoint(double outlineX, double outlineY)
+            {
+                double x = outlineX - outlineLeft;
+                double y = outlineY - outlineBottom;
+                x *= scaleFactor;
+                y *= scaleFactor;
+                x += startLeft;
+                y += startBottom;
+                return new Point(x, y);
+            }
+
+            public double GetX(double outlineX)
+            {
+                double x = outlineX - outlineLeft;
+                x *= scaleFactor;
+                x += startLeft;
+                return x;
+            }
+
+            public double GetY(double outlineY)
+            {
+                double y = outlineY - outlineBottom;
+                y *= scaleFactor;
+                y += startBottom;
+                return y;
+            }
+        }
     }
 }

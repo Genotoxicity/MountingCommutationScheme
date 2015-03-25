@@ -12,10 +12,10 @@ namespace MountingCommutationScheme
         private Dictionary<int, string> assignmentById;
         private DevicePin pin;
 
-        public MateAddresses(ProjectObjects projectObjects, List<int> connectionIds, IEnumerable<int> electricSchemePinsEquivalentToCabinetPins, HashSet<int> electricSchemeSheetIds)
+        public MateAddresses(ProjectObjects projectObjects, List<int> connectionIds, IEnumerable<int> electricSchemePinsEquivalentToCabinetPins)
         {
             pin = projectObjects.Pin;
-            mateIdsById = GetMateIdsById(projectObjects, electricSchemePinsEquivalentToCabinetPins, connectionIds, electricSchemeSheetIds);
+            mateIdsById = GetMateIdsById(projectObjects, electricSchemePinsEquivalentToCabinetPins, connectionIds);
             IEnumerable<int> pinIds = mateIdsById.Values.SelectMany(v=>v).Distinct();
             NormalDevice device = projectObjects.Device;
             int pinCount = pinIds.Count();
@@ -30,7 +30,7 @@ namespace MountingCommutationScheme
             }
         }
 
-        private static Dictionary<int, List<int>> GetMateIdsById(ProjectObjects projectObjects, IEnumerable<int> electricSchemePinsEquivalentToCabinetPins, List<int> connectionIds, HashSet<int> electricSchemeSheetIds)
+        private static Dictionary<int, List<int>> GetMateIdsById(ProjectObjects projectObjects, IEnumerable<int> electricSchemePinsEquivalentToCabinetPins, List<int> connectionIds)
         {
             Connection connection = projectObjects.Connection;
             DevicePin pin = projectObjects.Pin;
@@ -38,7 +38,7 @@ namespace MountingCommutationScheme
             foreach (int connectionId in connectionIds)
             {
                 connection.Id = connectionId;
-                List<int> connectionPinIds = connection.PinIds.Where(pId => { pin.Id = pId; return electricSchemeSheetIds.Contains(pin.SheetId); }).ToList();
+                List<int> connectionPinIds = connection.PinIds.Where(pId => { pin.Id = pId; return projectObjects.ElectricSheetIds.Contains(pin.SheetId); }).ToList();
                 IEnumerable<int> commonPinIds = electricSchemePinsEquivalentToCabinetPins.Intersect(connectionPinIds);
                 Dictionary<int, string> signalById = GetSignalById(pin, connectionPinIds);
                 foreach (int commonPinId in commonPinIds)

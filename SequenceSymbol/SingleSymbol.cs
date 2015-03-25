@@ -4,7 +4,7 @@ using KSPE3Lib;
 
 namespace MountingCommutationScheme
 {
-    public class SingleRowSymbol : RowSymbol
+    public class SingleSymbol : SequenceSymbol
     {
         private Element element;
 
@@ -16,17 +16,15 @@ namespace MountingCommutationScheme
             }
         }
 
-        public SingleRowSymbol(Element element)
+        public SingleSymbol(Element element, E3Text text)
         {
             this.element = element;
+            element.Calculate(text);
+            Width = element.Margins.Left + element.Margins.Right;
+            Height = element.Margins.Top + element.Margins.Bottom;
+            Margins = element.Margins;
         }
 
-        public override Margins CalculateAndGetMargins()
-        {
-            ElementSizes sizes = element.GetSizesAndSetSignalLineLength();
-            Width = sizes.Margins.Left + sizes.Margins.Right;
-            return sizes.Margins;
-        }
 
         public override void Place(ProjectObjects projectObjects, Sheet sheet, int sheetId, Point position)
         {

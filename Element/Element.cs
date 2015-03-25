@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
+using System;
 using KSPE3Lib;
 
 namespace MountingCommutationScheme
@@ -12,6 +13,10 @@ namespace MountingCommutationScheme
         protected List<ElementPin> firstPinsGroup;  // top / left
         protected List<ElementPin> secondPinsGroup; // bottom / right
         protected Component component;
+
+        public int Id { get; private set; }
+
+        public Margins Margins { get; private set; }
 
         public List<ElementPin> FirstPinsGroup
         {
@@ -65,16 +70,9 @@ namespace MountingCommutationScheme
             }
         }
 
-        public Orientation Orientation
+        protected Element(ProjectObjects projectObjects, DeviceOutline outline, Orientation orientation)
         {
-            get
-            {
-                return orientation;
-            }
-        }
-
-        protected Element(ProjectObjects projectObjects, DeviceOutline outline, Orientation orientation, HashSet<int> electricSchemeSheetIds)
-        {
+            Id = outline.DeviceId;
             this.orientation = orientation;
             firstPinsGroup = new List<ElementPin>();
             secondPinsGroup = new List<ElementPin>();
@@ -84,7 +82,7 @@ namespace MountingCommutationScheme
             DevicePin pin = projectObjects.Pin;
             Dictionary<int, Point> panelPositionById;
             List<ElementPin> pins;
-            GetPanelPinsAndPositions(pin, pinIds, electricSchemeSheetIds, out pins, out panelPositionById);
+            GetPanelPinsAndPositions(pin, pinIds, projectObjects.ElectricSheetIds, out pins, out panelPositionById);
             SplitPinsByGroups(outline, orientation, panelPositionById, pins);
             PinComparer comparer = new PinComparer(panelPositionById);
             firstPinsGroup.Sort(comparer);
@@ -162,16 +160,75 @@ namespace MountingCommutationScheme
             secondPinsGroup.ForEach(sp => sp.SetMateAdresses(mateAddresses));
         }
 
-        public ElementSizes GetSizesAndSetSignalLineLength()
+        public void Calculate(E3Text text)
         {
-            ElementSizes sizes = component.GetElementSizes(firstPinsGroup, secondPinsGroup);
-            SignalLineLength = sizes.SignalLineLength;
-            return sizes;
+            double leftMargin = component.OutlineWidth / 2;
+            double rightMargin = leftMargin;
+            double topMargin = component.OutlineHeight / 2;
+            double bottomMargin = topMargin;
+            PinGroupInfo firstPinGroupInfo = new PinGroupInfo(firstPinsGroup, text);
+            PinGroupInfo secondPinGroupInfo = new PinGroupInfo(secondPinsGroup, text);
+            SignalLineLength = Math.Max(firstPinGroupInfo.SignalLineLength, secondPinGroupInfo.SignalLineLength);
+            double additional = 0;
+            if (firstPinGroupInfo.AdressesLength > 0)
+                additional = SignalLineLength + firstPinGroupInfo.AdressesLength + Settings.AdressOffset;
+            else
+                if (firstPinGroupInfo.HasSignal)
+                    additional = SignalLineLength;
+            if (firstPinGroupInfo.HasJumper)
+                additional = Math.Max(additional, Settings.JumperHeight);
+            if (orientation == Orientation.Horizontal)
+                leftMargin += additional;
+            else
+                topMargin += additional;
+            additional = 0;
+            if (secondPinGroupInfo.AdressesLength > 0)
+                additional = SignalLineLength + secondPinGroupInfo.AdressesLength + Settings.AdressOffset;
+            else
+                if (secondPinGroupInfo.HasSignal)
+                    additional = SignalLineLength;
+            if (secondPinGroupInfo.HasJumper)
+                additional = Math.Max(additional, Settings.JumperHeight);
+            if (orientation == Orientation.Horizontal)
+                rightMargin += additional;
+            else
+                bottomMargin += additional;
+            Margins = new Margins(leftMargin, rightMargin, topMargin, bottomMargin);
         }
 
         public void Place(ProjectObjects projectObjects, Sheet sheet, int sheetId, Point position)
         {
             component.PlaceElement(projectObjects, sheet, sheetId, position, this);
+        }
+
+        private class PinGroupInfo
+        {
+            public bool HasSignal { get; private set; }
+            public double AdressesLength { get; private set; }
+            public double SignalLineLength { get; private set; }
+            public bool HasJumper { get; private set; }
+
+            public PinGroupInfo(List<ElementPin> pins, E3Text text)
+            {
+                if (pins.Count == 0)
+                {
+                    HasSignal = false;
+                    AdressesLength = 0;
+                    SignalLineLength = 0;
+                    HasJumper = false;
+                }
+                else
+                {
+                    HasJumper = pins.Any(p => p.IsJumpered);
+                    IEnumerable<string> addresses = pins.SelectMany(p => p.Addresses);
+                    if (addresses.Count() > 0)
+                        AdressesLength = addresses.Max(a => text.GetTextLength(a, Settings.SmallFont)) + Settings.AdressOffset;
+                    else
+                        AdressesLength = 0;
+                    HasSignal = pins.TrueForAll(p => !String.IsNullOrEmpty(p.Signal));
+                    SignalLineLength = pins.Max(p => text.GetTextLength(p.Signal, Settings.SmallFont)) + Settings.SignalOffsetFromOutline + Settings.SignalOffsetAfterText;
+                }
+            }
         }
 
         private class PinComparer : IComparer<ElementPin>

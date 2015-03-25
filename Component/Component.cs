@@ -12,7 +12,6 @@ namespace MountingCommutationScheme
         protected double nameHeight;
         protected double outlineHeight;
         protected double outlineWidth;
-        protected Settings settings;
         protected E3Text text;
 
         public double OutlineWidth
@@ -33,21 +32,18 @@ namespace MountingCommutationScheme
 
         public string Name { get; protected set; }
 
-        protected Component(E3Text text, Settings settings)
+        protected Component(E3Text text)
         {
-            this.settings = settings;
             this.text = text;
-            nameHeight = GetJustificatedLength(settings.Font.height);
+            nameHeight = GetJustificatedLength(Settings.Font.height);
         }
 
         public void AdjustNameLength(string name)
         {
-            nameLength = Math.Max(GetJustificatedLength(text.GetTextLength(name, settings.Font)), nameLength);
+            nameLength = Math.Max(GetJustificatedLength(text.GetTextLength(name, Settings.Font)), nameLength);
         }
 
         public abstract void Calculate();
-
-        public abstract ElementSizes GetElementSizes(List<ElementPin> firstPinsGroup, List<ElementPin> secondPinsGroup);
 
         public abstract void PlaceElement(ProjectObjects projectObjects, Sheet sheet, int sheetId,  Point position, Element element);
 
@@ -62,30 +58,11 @@ namespace MountingCommutationScheme
             return graph.CreateRectangle(sheetId, xLeft, yTop, xRight, yBottom);
         }
 
-        protected double GetSignalLineLength(List<ElementPin> firstPinsGroup, List<ElementPin> secondPinsGroup)
-        {
-            double firstMax = (firstPinsGroup.Count > 0) ? (firstPinsGroup.Max(fp => text.GetTextLength(fp.Signal, settings.SmallFont)) + settings.SignalOffsetFromOutline * 2) : 0;
-            double secondMax = (secondPinsGroup.Count > 0) ? (secondPinsGroup.Max(sp => text.GetTextLength(sp.Signal, settings.SmallFont)) + settings.SignalOffsetFromOutline * 2) : 0;
-            return Math.Max(firstMax, secondMax);
-        }
-
-        protected double GetAddressesLength(List<ElementPin> pins)
-        {
-            double addressesLength = 0;
-            if (pins.Count > 0)
-            {
-                IEnumerable<string> addresses = pins.SelectMany(p => p.Addresses);
-                if (addresses.Count() > 0)
-                    addressesLength = addresses.Max(a => text.GetTextLength(a, settings.SmallFont)) + settings.AdressOffset;
-            }
-            return addressesLength;
-        }
-
         protected double GetMaxPinSize(List<ComponentPin> firstPins, List<ComponentPin> secondPins)
         { 
             
-            double maxFirstPinNameSize = (firstPins.Count==0) ? 0 : firstPins.Max(fp => text.GetTextLength(fp.Name, settings.SmallFont));
-            double maxSecondPinNameSize = (secondPins.Count==0) ? 0 : secondPins.Max(sp => text.GetTextLength(sp.Name, settings.SmallFont));
+            double maxFirstPinNameSize = (firstPins.Count==0) ? 0 : firstPins.Max(fp => text.GetTextLength(fp.Name, Settings.SmallFont));
+            double maxSecondPinNameSize = (secondPins.Count==0) ? 0 : secondPins.Max(sp => text.GetTextLength(sp.Name, Settings.SmallFont));
             return GetJustificatedLength(Math.Max(maxFirstPinNameSize, maxSecondPinNameSize));
         }
 

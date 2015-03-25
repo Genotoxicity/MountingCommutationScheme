@@ -7,13 +7,11 @@ namespace MountingCommutationScheme
     {
         private Dictionary<string, Component> componentByName;
         private ProjectObjects projectObjects;
-        private Settings settings;
 
-        public ComponentManager(ProjectObjects projectObjects, Settings settings)
+        public ComponentManager(ProjectObjects projectObjects)
         {
             componentByName = new Dictionary<string, Component>();
             this.projectObjects = projectObjects;
-            this.settings = settings;
         }
 
         public Component GetDeviceComponent(string componentName, string deviceName, Orientation orientation, List<ElementPin> firstPinsGroup, List<ElementPin> secondPinsGroup)
@@ -23,9 +21,9 @@ namespace MountingCommutationScheme
             {
                 Component component;
                 if (orientation == Orientation.Vertical)
-                    component = new DeviceVerticalComponent(projectObjects, settings, firstPinsGroup, secondPinsGroup, componentName);
+                    component = new DeviceVerticalComponent(projectObjects, firstPinsGroup, secondPinsGroup, componentName);
                 else
-                    component = new DeviceHorizontalComponent(projectObjects, settings, firstPinsGroup, secondPinsGroup, componentName);
+                    component = new DeviceHorizontalComponent(projectObjects, firstPinsGroup, secondPinsGroup, componentName);
                 componentByName.Add(componentName, component);
             }
             componentByName[componentName].AdjustNameLength(deviceName);
@@ -39,9 +37,9 @@ namespace MountingCommutationScheme
             {
                 Component component;
                 if (orientation == Orientation.Vertical)
-                    component = new TerminalVerticalComponent(projectObjects, settings, firstPinsGroup, secondPinsGroup);
+                    component = new TerminalVerticalComponent(projectObjects, firstPinsGroup, secondPinsGroup);
                 else
-                    component = new TerminalHorizontalComponent(projectObjects, settings, firstPinsGroup, secondPinsGroup);
+                    component = new TerminalHorizontalComponent(projectObjects, firstPinsGroup, secondPinsGroup);
                 componentByName.Add(componentName, component);
             }
             return componentByName[componentName];

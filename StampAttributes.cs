@@ -1,29 +1,38 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Text.RegularExpressions;
+using System.Linq;
 using KSPE3Lib;
 
 namespace MountingCommutationScheme
 {
     public class StampAttributes
     {
-        private Settings settings;
         private int sheetCount;
-        private string drawingName;
         private string sheetMark;
         private string subProjectMark;
         private StampTextInfo projectTextInfo;
         private StampTextInfo objectTextInfo;
+        private StampTextInfo drawingTextInfo;
 
-        public StampAttributes(ProjectObjects projectObjects, Settings settings)
+        public StampAttributes(ProjectObjects projectObjects, int sheetId)
         {
-            this.settings = settings;
             Sheet sheet = projectObjects.Sheet;
-            sheet.Id = sheet.ParentSheetId;
-            subProjectMark = sheet.GetAttributeValue(settings.SubProjectAttribute);
-            drawingName = "Монтажно - коммутационная схема";
+            sheet.Id = sheetId;
+            subProjectMark = sheet.GetAttributeValue(Settings.SubProjectAttribute);
+            sheetMark = GetSheetMark(sheet);
+            E3Text text = projectObjects.Text;
+            projectTextInfo = new StampTextInfo(sheet, text, Settings.ProjectTextType);
+            objectTextInfo = new StampTextInfo(sheet, text, Settings.ObjectNameTextType);
+            drawingTextInfo = new StampTextInfo(sheet, text, Settings.DrawingNameTextType, Settings.DrawingName);
+        }
+
+
+        private string GetSheetMark(Sheet sheet)
+        {
+            string sheetMark = String.Empty;
             Regex regex = new Regex(@"(\d+)$");
-            sheetMark = String.Empty;
-            string mark = sheet.GetAttributeValue(settings.SheetMarkAttribute);
+            string mark = sheet.GetAttributeValue(Settings.SheetMarkAttribute);
             if (!String.IsNullOrEmpty(mark))
             {
                 MatchCollection matches = regex.Matches(mark);
@@ -34,9 +43,7 @@ namespace MountingCommutationScheme
                     sheetMark = regex.Replace(mark, index.ToString());
                 }
             }
-            E3Text text = projectObjects.Text;
-            projectTextInfo = new StampTextInfo(sheet, text, settings.ProjectTextType);
-            objectTextInfo = new StampTextInfo(sheet, text, settings.ObjectNameTextType);
+            return sheetMark;
         }
 
         public void SetSheetCount(int sheetCount)
@@ -47,9 +54,9 @@ namespace MountingCommutationScheme
         public void SetAttributes(Sheet sheet, E3Text text, int sheetNumber)
         {
             if (!String.IsNullOrEmpty(sheetMark))
-                sheet.SetAttribute(settings.SheetMarkAttribute, sheetMark);
+                sheet.SetAttribute(Settings.SheetMarkAttribute, sheetMark);
             if (!String.IsNullOrEmpty(subProjectMark))
-                sheet.SetAttribute(settings.SubProjectAttribute, subProjectMark);
+                sheet.SetAttribute(Settings.SubProjectAttribute, subProjectMark);
             if (sheetNumber == 1)
                 SetFirstPageAttributes(sheet, text);
         }
@@ -57,11 +64,10 @@ namespace MountingCommutationScheme
         private void SetFirstPageAttributes(Sheet sheet, E3Text text)
         {
             if (sheetCount > 0)
-                sheet.SetAttribute(settings.SheetCountAttribute, sheetCount.ToString());
-            if (!String.IsNullOrEmpty(drawingName))
-                sheet.SetAttribute(settings.DrawingNameAttribute, drawingName);
+                sheet.SetAttribute(Settings.SheetCountAttribute, sheetCount.ToString());
             projectTextInfo.SetTextPropertiesOnSheet(sheet, text);
             objectTextInfo.SetTextPropertiesOnSheet(sheet, text);
+            drawingTextInfo.SetTextAndFontOnSheet(sheet, text);
         }
 
     }

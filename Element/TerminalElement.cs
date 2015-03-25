@@ -8,7 +8,7 @@ namespace MountingCommutationScheme
     {
         public string TerminalName { get; private set; }
 
-        public TerminalElement(ProjectObjects projectObjects, DeviceOutline outline, Orientation orientation, ComponentManager componentManager, HashSet<int> electricSchemeSheetIds) : base(projectObjects, outline, orientation, electricSchemeSheetIds)
+        public TerminalElement(ProjectObjects projectObjects, DeviceOutline outline, ComponentManager componentManager, Orientation orientation) : base(projectObjects, outline, orientation)
         { 
             Device device = projectObjects.Device;
             DevicePin pin = projectObjects.Pin;

@@ -11,8 +11,8 @@ namespace MountingCommutationScheme
         protected double pinWidth;
         protected double pinHeight;
 
-        public DeviceHorizontalComponent(ProjectObjects projectObjects, Settings settings, List<ElementPin> firstPinsGroup, List<ElementPin> secondPinsGroup, string name)
-            : base(projectObjects, settings, firstPinsGroup, secondPinsGroup)
+        public DeviceHorizontalComponent(ProjectObjects projectObjects, List<ElementPin> firstPinsGroup, List<ElementPin> secondPinsGroup, string name)
+            : base(projectObjects, firstPinsGroup, secondPinsGroup)
         {
             Name = name;
         }
@@ -20,9 +20,9 @@ namespace MountingCommutationScheme
         protected override void CalculateHorizontal()
         {
             pinWidth = GetMaxPinSize(leftPins, rightPins);
-            pinHeight = settings.PinMinSize;
+            pinHeight = Settings.PinMinSize;
             outlineWidth = pinWidth * 2 + nameLength;
-            double pinsHeight = Math.Max(leftPins.Count, rightPins.Count) * (pinHeight + settings.GridStep);
+            double pinsHeight = Math.Max(leftPins.Count, rightPins.Count) * (pinHeight + Settings.GridStep);
             outlineHeight = Math.Max(nameHeight, pinsHeight);
             SetPinsOffset(leftPins);
             SetPinsOffset(rightPins);
@@ -50,7 +50,7 @@ namespace MountingCommutationScheme
             Graphic graph = projectObjects.Graphic;
             List<int> graphIds = new List<int>();
             graphIds.Add(CreateOutline(graph, sheet, sheetId, position));
-            graphIds.Add(CreateNameHorizontalText(sheet, sheetId, element.Name, position, settings.Font));
+            graphIds.Add(CreateNameHorizontalText(sheet, sheetId, element.Name, position, Settings.Font));
             double outlineLeft = sheet.MoveLeft(position.X, outlineWidth / 2);
             double leftPinRight = sheet.MoveRight(outlineLeft, pinWidth);
             graphIds.AddRange(CreatePins(sheet, sheetId, position, graph, leftPins, element.FirstPinsGroup, outlineLeft, leftPinRight, element.SignalLineLength, Position.Left));
@@ -72,8 +72,8 @@ namespace MountingCommutationScheme
                 double pinTop = sheet.MoveUp(position.Y, componentPin.Offset);
                 double pinBottom = sheet.MoveDown(pinTop, pinHeight);
                 double pinCenterY = (pinTop + pinBottom) / 2;
-                double nameY = sheet.MoveDown(pinCenterY, settings.SmallFont.height / 2);
-                graphIds.Add(text.CreateText(sheetId, componentPin.Name, nameX, nameY, settings.SmallFont));
+                double nameY = sheet.MoveDown(pinCenterY, Settings.SmallFont.height / 2);
+                graphIds.Add(text.CreateText(sheetId, componentPin.Name, nameX, nameY, Settings.SmallFont));
                 graphIds.Add(graph.CreateRectangle(sheetId, pinLeft, pinTop, pinRight, pinBottom));
                 graphIds.AddRange(CreateHorizontalSignalAndAddresses(sheet, sheetId, graph, elementPin, signalLineLength, (pinsPosition == Position.Left) ? pinLeft : pinRight, pinCenterY, pinsPosition));
             }

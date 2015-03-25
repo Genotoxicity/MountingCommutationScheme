@@ -40,8 +40,7 @@
     <ApplicationIcon>Sample.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="KSPE3Lib, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="KSPE3Lib">
       <HintPath>..\..\KSPE3Lib\KSPE3Lib\bin\Debug\KSPE3Lib.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -64,29 +63,29 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Cabinet.cs" />
-    <Compile Include="CabinetSide.cs" />
-    <Compile Include="ComponentPin.cs" />
+    <Compile Include="CabinetPreview.cs" />
+    <Compile Include="ElementSequence.cs" />
+    <Compile Include="Outline\DeviceOutlineVerticalComparer.cs" />
+    <Compile Include="Component\ComponentPin.cs" />
     <Compile Include="Component\Component.cs" />
     <Compile Include="Component\ComponentManager.cs" />
     <Compile Include="Component\DeviceHorizontalComponent.cs" />
     <Compile Include="ElementPin.cs" />
     <Compile Include="Element\DeviceElement.cs" />
-    <Compile Include="DeviceOutline.cs" />
-    <Compile Include="DeviceOutlineOnSheetHorizontalComparer.cs" />
+    <Compile Include="Outline\DeviceOutline.cs" />
+    <Compile Include="Outline\DeviceOutlineHorizontalComparer.cs" />
     <Compile Include="Component\DeviceVerticalComponent.cs" />
     <Compile Include="Element\Element.cs" />
     <Compile Include="Component\HorizontalComponent.cs" />
     <Compile Include="Enums\Level.cs" />
-    <Compile Include="ElementSizes.cs" />
-    <Compile Include="Margins.cs" />
+    <Compile Include="Element\Margins.cs" />
     <Compile Include="MateAddresses.cs" />
     <Compile Include="Enums\Orientation.cs" />
     <Compile Include="Enums\Position.cs" />
-    <Compile Include="PreviewAllocator.cs" />
+    <Compile Include="Outline\OutlineSequence.cs" />
+    <Compile Include="Page.cs" />
     <Compile Include="ProjectObjects.cs" />
-    <Compile Include="Row.cs" />
-    <Compile Include="RowSymbol\RowSymbol.cs" />
-    <Compile Include="SchemeSheet.cs" />
+    <Compile Include="SequenceSymbol\SequenceSymbol.cs" />
     <Compile Include="Script.cs" />
     <Compile Include="Component\TerminalHorizontalComponent.cs" />
     <Compile Include="Component\VerticalComponent.cs" />
@@ -99,15 +98,17 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="Settings.cs" />
-    <Compile Include="RowSymbol\SingleRowSymbol.cs" />
+    <Compile Include="SequenceSymbol\SingleSymbol.cs" />
+    <Compile Include="SidePreview.cs" />
+    <Compile Include="SideOutlineLayout.cs" />
+    <Compile Include="SideSymbolLayout.cs" />
     <Compile Include="StampAttributes.cs" />
     <Compile Include="SheetFormat.cs" />
-    <Compile Include="SidePreview.cs" />
     <Compile Include="Enums\SideType.cs" />
     <Compile Include="StampTextInfo.cs" />
     <Compile Include="Component\TerminalVerticalComponent.cs" />
     <Compile Include="Element\TerminalElement.cs" />
-    <Compile Include="RowSymbol\StripRowSymbol.cs" />
+    <Compile Include="SequenceSymbol\StripSymbol.cs" />
     <Compile Include="UI.xaml.cs">
       <DependentUpon>UI.xaml</DependentUpon>
       <SubType>Code</SubType>

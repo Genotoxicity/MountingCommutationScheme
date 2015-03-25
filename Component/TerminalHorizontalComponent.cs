@@ -7,16 +7,16 @@ namespace MountingCommutationScheme
 {
     class TerminalHorizontalComponent : HorizontalComponent
     {
-        public TerminalHorizontalComponent(ProjectObjects projectObjects, Settings settings, List<ElementPin> firstPinsGroup, List<ElementPin> secondPinsGroup)
-            : base(projectObjects, settings, firstPinsGroup, secondPinsGroup)
+        public TerminalHorizontalComponent(ProjectObjects projectObjects, List<ElementPin> firstPinsGroup, List<ElementPin> secondPinsGroup)
+            : base(projectObjects, firstPinsGroup, secondPinsGroup)
         {
             Name = "TerminalHorizontalComponent";
         }
 
         protected override void CalculateHorizontal()
         {
-            outlineHeight = settings.TerminalMinSize;
-            outlineWidth = settings.TerminalMaxSize;
+            outlineHeight = Settings.TerminalMinSize;
+            outlineWidth = Settings.TerminalMaxSize;
             double offset = outlineWidth / 2;
             leftPins.First().SetOffset(offset);
             rightPins.First().SetOffset(offset);
@@ -28,7 +28,7 @@ namespace MountingCommutationScheme
             List<int> graphIds = new List<int>();
             graphIds.Add(CreateOutline(graph, sheet, sheetId, position));
             TerminalElement terminalElement = element as TerminalElement;
-            graphIds.Add(CreateNameHorizontalText(sheet, sheetId, terminalElement.TerminalName, position, settings.SmallFont));
+            graphIds.Add(CreateNameHorizontalText(sheet, sheetId, terminalElement.TerminalName, position, Settings.SmallFont));
             double outlineLeft = sheet.MoveLeft(position.X, outlineWidth / 2);
             double outlineRight = sheet.MoveRight(position.X, outlineWidth / 2);
             graphIds.AddRange(CreateHorizontalSignalAndAddresses(sheet, sheetId, graph, element.FirstPinsGroup.First(), element.SignalLineLength, outlineLeft, position.Y, Position.Left));

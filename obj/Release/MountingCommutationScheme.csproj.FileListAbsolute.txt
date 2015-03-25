@@ -1,1 +1,16 @@
 D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\bin\Release\Монтажно-коммутационная схема.exe.config
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\bin\Release\Монтажно-коммутационная схема.exe
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\bin\Release\Монтажно-коммутационная схема.pdb
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\bin\Release\KSPE3Lib.dll
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\bin\Release\CTDispatcher.dll
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\bin\Release\KSPE3Lib.pdb
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\obj\Release\MountingCommutationScheme.csprojResolveAssemblyReference.cache
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\obj\Release\UI.baml
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\obj\Release\UI.g.cs
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\obj\Release\App.g.cs
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\obj\Release\Монтажно-коммутационная схема_MarkupCompile.cache
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\obj\Release\Монтажно-коммутационная схема.g.resources
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\obj\Release\MountingCommutationScheme.Properties.Resources.resources
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\obj\Release\MountingCommutationScheme.csproj.GenerateResource.Cache
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\obj\Release\Монтажно-коммутационная схема.exe
+D:\Altergot\Projects\C#\E3\MountingCommutationScheme\MountingCommutationScheme\obj\Release\Монтажно-коммутационная схема.pdb
